@@ -9,8 +9,20 @@ export class PieChartApp {
         this.nextEntryId = 0;
         this.selectedEntryId = null;
         this.svgElement = null;
-        this.dragSourceIndex = null;
+        
+        // ドラッグ関連の状態
+        this.draggingElement = null;
+        this.dragTargetData = null;
+        this.dragOffsetX = 0;
+        this.dragOffsetY = 0;
+
         this.colors = ['#4CAF50', '#2196F3', '#FFC107', '#E91E63', '#9C27B0', '#00BCD4', '#FF9800', '#795548', '#607D8B', '#FF5722'];
+        
+        // グローバルなマウスイベントのバインド（thisを固定）
+        this.handleMouseMove = this.handleMouseMove.bind(this);
+        this.handleMouseUp = this.handleMouseUp.bind(this);
+        window.addEventListener('mousemove', this.handleMouseMove);
+        window.addEventListener('mouseup', this.handleMouseUp);
     }
 
     // --- データ管理 ---
@@ -22,17 +34,9 @@ export class PieChartApp {
             value: Number(value) || 0,
             imageSrc,
             imageSettings: { scale: 1, offsetX: 0, offsetY: 0 },
-            leaderLine: { x1: 0, y1: 0, x2: 0, y2: 0, labelX: 0, labelY: 0, active: true }
+            // ラベルの座標。初期値はnullにし、描画時に計算
+            labelPos: { x: 0, y: 0, isCustom: false } 
         });
-        this.refresh();
-    }
-
-    removeEntry(id) {
-        this.dataEntries = this.dataEntries.filter(item => item.id !== id);
-        if (this.selectedEntryId === id) {
-            this.selectedEntryId = null;
-            this.dom.imageControlsContainer.classList.add('hidden');
-        }
         this.refresh();
     }
 
@@ -41,18 +45,104 @@ export class PieChartApp {
         this.drawPieChart();
     }
 
-    // --- 並び替え (Drag & Drop) ---
-    handleDragStart(index) {
-        this.dragSourceIndex = index;
+    // --- ラベルのドラッグ移動ロジック ---
+    handleMouseDown(e, entry) {
+        this.draggingElement = e.target;
+        this.dragTargetData = entry;
+        
+        const pt = this.getSVGPoint(e);
+        this.dragOffsetX = pt.x - entry.labelPos.x;
+        this.dragOffsetY = pt.y - entry.labelPos.y;
+        
+        e.target.style.cursor = 'grabbing';
+        e.stopPropagation();
     }
 
-    handleDrop(targetIndex) {
-        if (this.dragSourceIndex !== null && this.dragSourceIndex !== targetIndex) {
-            const [movedItem] = this.dataEntries.splice(this.dragSourceIndex, 1);
-            this.dataEntries.splice(targetIndex, 0, movedItem);
-            this.refresh();
+    handleMouseMove(e) {
+        if (!this.draggingElement || !this.dragTargetData) return;
+
+        const pt = this.getSVGPoint(e);
+        this.dragTargetData.labelPos.x = pt.x - this.dragOffsetX;
+        this.dragTargetData.labelPos.y = pt.y - this.dragOffsetY;
+        this.dragTargetData.labelPos.isCustom = true;
+
+        this.draggingElement.setAttribute("x", this.dragTargetData.labelPos.x);
+        this.draggingElement.setAttribute("y", this.dragTargetData.labelPos.y);
+    }
+
+    handleMouseUp() {
+        if (this.draggingElement) {
+            this.draggingElement.style.cursor = 'grab';
         }
-        this.dragSourceIndex = null;
+        this.draggingElement = null;
+        this.dragTargetData = null;
+    }
+
+    getSVGPoint(e) {
+        const p = this.svgElement.createSVGPoint();
+        p.x = e.clientX;
+        p.y = e.clientY;
+        return p.matrixTransform(this.svgElement.getScreenCTM().inverse());
+    }
+
+    // --- 描画ロジック ---
+    drawPieChart() {
+        const validEntries = this.dataEntries.filter(e => e.value > 0);
+        this.dom.chartContainer.innerHTML = '';
+        if (validEntries.length === 0) return;
+
+        const size = 400; // 基準サイズ
+        const radius = size * 0.3;
+        const centerX = size / 2, centerY = size / 2;
+        const total = validEntries.reduce((s, e) => s + e.value, 0);
+
+        this.svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        this.svgElement.setAttribute("viewBox", `0 0 ${size} ${size}`);
+        this.dom.chartContainer.appendChild(this.svgElement);
+
+        let currentAngle = -Math.PI / 2;
+
+        validEntries.forEach((entry, i) => {
+            const sliceAngle = (entry.value / total) * 2 * Math.PI;
+            const midAngle = currentAngle + sliceAngle / 2;
+            const endAngle = currentAngle + sliceAngle;
+
+            // パイの描画
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", this.getArcPath(centerX, centerY, radius, currentAngle, endAngle));
+            path.setAttribute("fill", this.colors[i % this.colors.length]);
+            path.setAttribute("stroke", "#fff");
+            this.svgElement.appendChild(path);
+
+            // ラベルの座標計算（カスタム移動がない場合のみ初期計算）
+            if (!entry.labelPos.isCustom) {
+                entry.labelPos.x = centerX + (radius * 1.4) * Math.cos(midAngle);
+                entry.labelPos.y = centerY + (radius * 1.4) * Math.sin(midAngle);
+            }
+
+            // ラベル要素の作成
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", entry.labelPos.x);
+            text.setAttribute("y", entry.labelPos.y);
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("class", "draggable-label");
+            text.style.cursor = 'grab';
+            text.style.userSelect = 'none';
+            text.textContent = `${entry.name} (${(entry.value/total*100).toFixed(1)}%)`;
+
+            // ラベル移動用イベントリスナー
+            text.addEventListener('mousedown', (e) => this.handleMouseDown(e, entry));
+
+            this.svgElement.appendChild(text);
+            currentAngle = endAngle;
+        });
+    }
+
+    getArcPath(cx, cy, r, startAngle, endAngle) {
+        const x1 = cx + r * Math.cos(startAngle), y1 = cy + r * Math.sin(startAngle);
+        const x2 = cx + r * Math.cos(endAngle), y2 = cy + r * Math.sin(endAngle);
+        const largeArc = (endAngle - startAngle) > Math.PI ? 1 : 0;
+        return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
     }
 
     // --- UI描画: テーブル ---
@@ -238,4 +328,5 @@ export class PieChartApp {
             this.drawPieChart();
         }
     }
+
 }

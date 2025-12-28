@@ -1,7 +1,6 @@
 import { PieChartApp } from './pieChartApp.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // DOM要素の参照
     const dom = {
         chartContainer: document.getElementById('chart-container'),
         dataTableBody: document.getElementById('data-table-body'),
@@ -61,7 +60,4 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
     };
-
-    // 初期データの追加
-    app.addDataEntry("サンプル", 50);
 });

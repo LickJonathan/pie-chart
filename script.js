@@ -121,10 +121,29 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function createRowInTable(entry) {
         const row = dom.dataTableBody.insertRow();
-        row.className = 'bg-white border-b hover:bg-gray-50';
+        row.className = 'bg-white border-b hover:bg-gray-50 transition-all';
         row.dataset.id = entry.id;
-
-        // 各セルの作成
+        
+        // ドラッグ＆ドロップ設定
+        row.draggable = true;
+        row.addEventListener('dragstart', handleDragStart);
+        row.addEventListener('dragover', handleDragOver);
+        row.addEventListener('dragleave', handleDragLeave);
+        row.addEventListener('drop', handleDrop);
+        row.addEventListener('dragend', handleDragEnd);
+    
+        // 1. ハンドルセルの作成
+        const handleCell = row.insertCell();
+        handleCell.className = 'px-2 py-2 text-center';
+        const handleIcon = document.createElement('div');
+        handleIcon.className = 'drag-handle';
+        handleIcon.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>`;
+        handleCell.appendChild(handleIcon);
+    
+        // 2. 既存のセル作成を呼び出し
         createNameCell(row, entry);
         createValueCell(row, entry);
         createImageCell(row, entry);
@@ -534,38 +553,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (row) row.classList.remove('dragging-row');
         // 全ての行から drag-over を除去（念のため）
         [...dom.dataTableBody.children].forEach(r => r.classList.remove('drag-over'));
-    }
-    
-    // --- createRowInTable 関数を更新 ---
-    function createRowInTable(entry) {
-        const row = dom.dataTableBody.insertRow();
-        row.className = 'bg-white border-b hover:bg-gray-50 transition-all';
-        row.dataset.id = entry.id;
-        
-        // ドラッグ＆ドロップ設定
-        row.draggable = true;
-        row.addEventListener('dragstart', handleDragStart);
-        row.addEventListener('dragover', handleDragOver);
-        row.addEventListener('dragleave', handleDragLeave);
-        row.addEventListener('drop', handleDrop);
-        row.addEventListener('dragend', handleDragEnd);
-    
-        // 1. ハンドルセルの作成
-        const handleCell = row.insertCell();
-        handleCell.className = 'px-2 py-2 text-center';
-        const handleIcon = document.createElement('div');
-        handleIcon.className = 'drag-handle';
-        handleIcon.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>`;
-        handleCell.appendChild(handleIcon);
-    
-        // 2. 既存のセル作成を呼び出し
-        createNameCell(row, entry);
-        createValueCell(row, entry);
-        createImageCell(row, entry);
-        createActionCell(row, entry);
     }
 
     // --- イベントリスナーの設定 ---

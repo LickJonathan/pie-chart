@@ -1,13 +1,13 @@
 // DOMの読み込みが完了したらスクリプトを実行
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     // --- グローバル変数と定数 ---
-    let dataEntries = []; 
+    let dataEntries = [];
     let nextEntryId = 0;
-    let selectedEntryId = null; 
-    let draggingElement = null; 
-    let dragOffsetX, dragOffsetY; 
-    let svgElement; 
+    let selectedEntryId = null;
+    let draggingElement = null;
+    let dragOffsetX, dragOffsetY;
+    let svgElement;
     let dragSourceIndex = null;
 
     // --- DOM要素の取得 ---
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
         chartPlaceholder: document.getElementById('chart-placeholder'),
         customMessageDiv: document.getElementById('custom-message')
     };
-    
+
     // --- ユーティリティ関数 ---
 
     /**
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.customMessageDiv.classList.add('show');
         setTimeout(() => { dom.customMessageDiv.classList.remove('show'); }, duration);
     }
-    
+
     /**
      * パイ（扇形）のSVGパスデータを生成する
      * @param {number} cx - 中心X座標
@@ -68,9 +68,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const largeArcFlag = (endAngle - startAngle) <= Math.PI ? "0" : "1";
         // 稀なケースのエッジケース対応
         if (Math.abs(startX - endX) < 0.01 && Math.abs(startY - endY) < 0.01 && (endAngle - startAngle) > 0) {
-             if ((endAngle - startAngle) > Math.PI * 1.99) { 
-                 return `M ${cx},${cy} L ${startX},${startY} A ${r},${r} 0 ${largeArcFlag} 1 ${endX - 0.01},${endY} Z`;
-             }
+            if ((endAngle - startAngle) > Math.PI * 1.99) {
+                return `M ${cx},${cy} L ${startX},${startY} A ${r},${r} 0 ${largeArcFlag} 1 ${endX - 0.01},${endY} Z`;
+            }
         }
         return `M ${cx},${cy} L ${startX},${startY} A ${r},${r} 0 ${largeArcFlag} 1 ${endX},${endY} Z`;
     }
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!hasData) {
             dom.downloadPngBtn.disabled = true;
             if (dom.chartPlaceholder) dom.chartPlaceholder.classList.remove('hidden');
-            if (svgElement) svgElement.remove(); 
+            if (svgElement) svgElement.remove();
             svgElement = null;
         } else {
             if (dom.chartPlaceholder) dom.chartPlaceholder.classList.add('hidden');
@@ -123,15 +123,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const row = dom.dataTableBody.insertRow();
         row.className = 'bg-white border-b hover:bg-gray-50 transition-all';
         row.dataset.id = entry.id;
-        
+
         // ドラッグ＆ドロップ設定
-        row.draggable = true;
         row.addEventListener('dragstart', handleDragStart);
         row.addEventListener('dragover', handleDragOver);
         row.addEventListener('dragleave', handleDragLeave);
         row.addEventListener('drop', handleDrop);
         row.addEventListener('dragend', handleDragEnd);
-    
+
         // 1. ハンドルセルの作成
         const handleCell = row.insertCell();
         handleCell.className = 'px-2 py-2 text-center';
@@ -141,8 +140,14 @@ document.addEventListener('DOMContentLoaded', () => {
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>`;
+
+        // ハンドル部分のみドラッグ可能にするための設定
+        handleIcon.addEventListener('mousedown', () => { row.draggable = true; });
+        handleIcon.addEventListener('mouseup', () => { row.draggable = false; });
+        handleIcon.addEventListener('mouseleave', () => { row.draggable = false; });
+
         handleCell.appendChild(handleIcon);
-    
+
         // 2. 既存のセル作成を呼び出し
         createNameCell(row, entry);
         createValueCell(row, entry);
@@ -214,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         cell.appendChild(deleteBtn);
     }
-    
+
     // --- 画像調整UI関数 ---
 
     /**
@@ -223,11 +228,11 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function updateImageControlsUI(entry) {
         dom.selectedItemNameSpan.textContent = entry.name;
-        dom.imageScaleInput.value = entry.imageSettings.scale; 
+        dom.imageScaleInput.value = entry.imageSettings.scale;
         dom.scaleValueSpan.textContent = entry.imageSettings.scale;
         dom.imageOffsetXInput.value = entry.imageSettings.offsetX;
         dom.offsetXValueSpan.textContent = entry.imageSettings.offsetX;
-        dom.imageOffsetYInput.value = entry.imageSettings.offsetY; 
+        dom.imageOffsetYInput.value = entry.imageSettings.offsetY;
         dom.offsetYValueSpan.textContent = entry.imageSettings.offsetY;
         dom.imageControlsContainer.classList.remove('hidden');
     }
@@ -240,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.imageOffsetXInput.oninput = (e) => handleImageControlChange('offsetX', parseInt(e.target.value));
         dom.imageOffsetYInput.oninput = (e) => handleImageControlChange('offsetY', parseInt(e.target.value));
     }
-    
+
     /**
      * 画像調整コントロールの変更を処理する
      * @param {string} property - 変更されたプロパティ名 ('scale', 'offsetX', 'offsetY')
@@ -254,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 対応するspanの値を更新
             const spanId = `${property.toLowerCase().replace('offset', '')}-value`;
             const span = document.getElementById(spanId);
-            if(span) span.textContent = value;
+            if (span) span.textContent = value;
 
             drawPieChart();
         }
@@ -262,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- 描画関数 ---
-    
+
     /**
      * SVGのViewBoxを動的に更新し、全要素が収まるようにする
      * @param {number} padding - 表示領域の余白
@@ -285,10 +290,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (minX === Infinity) return; // 有効な要素がない場合
         const boxWidth = maxX - minX;
         const boxHeight = maxY - minY;
-        const newViewBox = [ minX - padding, minY - padding, boxWidth + padding * 2, boxHeight + padding * 2 ].join(' ');
+        const newViewBox = [minX - padding, minY - padding, boxWidth + padding * 2, boxHeight + padding * 2].join(' ');
         svgElement.setAttribute('viewBox', newViewBox);
     }
-    
+
     /**
      * メインの円グラフ描画処理
      */
@@ -300,29 +305,29 @@ document.addEventListener('DOMContentLoaded', () => {
         if (validEntries.length === 0) {
             dom.chartContainer.innerHTML = `<p id="chart-placeholder" class="text-gray-400 p-4 text-center">${dataEntries.length === 0 ? 'データ入力後にグラフが表示されます' : '有効なデータ（値が0より大きい）がありません'}</p>`;
             dom.chartPlaceholder = document.getElementById('chart-placeholder'); // 要素を再取得
-            dom.downloadPngBtn.disabled = true; 
-            dom.imageControlsContainer.classList.add('hidden'); 
-            selectedEntryId = null; 
+            dom.downloadPngBtn.disabled = true;
+            dom.imageControlsContainer.classList.add('hidden');
+            selectedEntryId = null;
             return;
         }
         dom.downloadPngBtn.disabled = false;
 
         const totalValue = validEntries.reduce((sum, entry) => sum + entry.value, 0);
 
-        const containerWidth = dom.chartContainer.clientWidth; 
-        const svgWidth = containerWidth; const svgHeight = containerWidth; 
-        const radius = Math.min(svgWidth, svgHeight) * 0.35; 
-        const labelRadius = radius * 1.45; 
-        const leaderLineLabelOffset = 20; 
-        const fontSize = 12; 
+        const containerWidth = dom.chartContainer.clientWidth;
+        const svgWidth = containerWidth; const svgHeight = containerWidth;
+        const radius = Math.min(svgWidth, svgHeight) * 0.35;
+        const labelRadius = radius * 1.45;
+        const leaderLineLabelOffset = 20;
+        const fontSize = 12;
         const centerX = svgWidth / 2; const centerY = svgHeight / 2;
         const colors = ['#4CAF50', '#2196F3', '#FFC107', '#E91E63', '#9C27B0', '#00BCD4', '#FF9800', '#795548', '#607D8B', '#FF5722'];
-        
+
         svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svgElement.setAttribute("width", "100%"); 
+        svgElement.setAttribute("width", "100%");
         svgElement.setAttribute("height", "100%");
-        svgElement.setAttribute("viewBox", `0 0 ${svgWidth} ${svgHeight}`); 
-        dom.chartContainer.appendChild(svgElement); 
+        svgElement.setAttribute("viewBox", `0 0 ${svgWidth} ${svgHeight}`);
+        dom.chartContainer.appendChild(svgElement);
 
         const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
         svgElement.appendChild(defs);
@@ -348,13 +353,13 @@ document.addEventListener('DOMContentLoaded', () => {
             let fillStyle = colors[index % colors.length];
             if (entry.imageSrc) {
                 const patternId = `pattern-${entry.id}`;
-                fillStyle = `url(#${patternId})`; 
+                fillStyle = `url(#${patternId})`;
                 const pattern = document.createElementNS("http://www.w3.org/2000/svg", "pattern");
-                pattern.setAttribute("id", patternId); pattern.setAttribute("patternUnits", "userSpaceOnUse"); 
+                pattern.setAttribute("id", patternId); pattern.setAttribute("patternUnits", "userSpaceOnUse");
                 pattern.setAttribute("width", svgWidth); pattern.setAttribute("height", svgHeight);
                 const image = document.createElementNS("http://www.w3.org/2000/svg", "image");
                 image.setAttributeNS("http://www.w3.org/1999/xlink", "href", entry.imageSrc);
-                
+
                 const centroidRadius = (2 / 3) * radius;
                 const imageCenterX = centerX + centroidRadius * Math.cos(midAngle);
                 const imageCenterY = centerY + centroidRadius * Math.sin(midAngle);
@@ -372,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
             pieSlice.setAttribute("fill", fillStyle);
             if (entry.imageSrc) pieSlice.setAttribute("clip-path", `url(#${clipPathId})`);
             pieSlice.setAttribute("stroke", "#fff"); pieSlice.setAttribute("stroke-width", "2");
-            pieSlice.dataset.id = entry.id; 
+            pieSlice.dataset.id = entry.id;
             pieSlice.classList.add("cursor-pointer", "hover:opacity-80", "transition-opacity");
             pieSlice.onclick = () => { selectedEntryId = entry.id; updateImageControlsUI(entry); };
             pieSlices.push(pieSlice);
@@ -399,33 +404,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 label.setAttribute("x", entry.leaderLine.labelX);
                 label.setAttribute("y", entry.leaderLine.labelY);
-                label.setAttribute("text-anchor", "middle"); 
+                label.setAttribute("text-anchor", "middle");
                 label.setAttribute("font-size", `${fontSize}px`);
                 label.setAttribute("fill", "#333");
                 label.classList.add("draggable", "leader-line-label");
-                label.dataset.id = entry.id; label.dataset.type = "label"; 
-                
+                label.dataset.id = entry.id; label.dataset.type = "label";
+
                 const tspan1 = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
                 tspan1.textContent = `${entry.name} (${entry.value.toLocaleString()})`;
                 tspan1.setAttribute("x", entry.leaderLine.labelX);
-                tspan1.setAttribute("dy", `-${fontSize * 0.2}px`); 
-                
+                tspan1.setAttribute("dy", `-${fontSize * 0.2}px`);
+
                 const tspan2 = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
                 const percentage = (entry.value / totalValue * 100).toFixed(1);
                 tspan2.textContent = `${percentage}%`;
                 tspan2.setAttribute("x", entry.leaderLine.labelX);
-                tspan2.setAttribute("dy", `${fontSize * 1.2}px`); 
+                tspan2.setAttribute("dy", `${fontSize * 1.2}px`);
                 label.appendChild(tspan1); label.appendChild(tspan2);
-                
+
                 // 線要素
                 const line = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
                 line.setAttribute("points", `${entry.leaderLine.x1},${entry.leaderLine.y1} ${entry.leaderLine.x2},${entry.leaderLine.y2}`);
                 line.setAttribute("stroke", "#333"); line.setAttribute("stroke-width", "1.5");
-                line.setAttribute("fill", "none"); line.dataset.lineFor = entry.id; 
+                line.setAttribute("fill", "none"); line.dataset.lineFor = entry.id;
 
-                labelsAndLines.push({label, line});
+                labelsAndLines.push({ label, line });
             }
-            currentAngle = endAngle; 
+            currentAngle = endAngle;
         });
 
         // 描画順序を考慮してSVGに追加
@@ -439,12 +444,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- ラベルのドラッグ処理関数 ---
-    
+
     function startDrag(evt) {
         if (evt.target.closest('.leader-line-label') && svgElement) {
-            draggingElement = evt.target.closest('.leader-line-label'); 
+            draggingElement = evt.target.closest('.leader-line-label');
             draggingElement.classList.add('dragging');
-            const CTM = svgElement.getScreenCTM(); if (!CTM) return; 
+            const CTM = svgElement.getScreenCTM(); if (!CTM) return;
             const inverseCTM = CTM.inverse();
             const pt = svgElement.createSVGPoint(); pt.x = evt.clientX; pt.y = evt.clientY;
             const svgP = pt.matrixTransform(inverseCTM);
@@ -452,7 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
             dragOffsetY = svgP.y - parseFloat(draggingElement.getAttribute("y"));
             document.addEventListener('mousemove', drag);
             document.addEventListener('mouseup', endDrag);
-            evt.preventDefault(); 
+            evt.preventDefault();
         }
     }
 
@@ -475,13 +480,13 @@ document.addEventListener('DOMContentLoaded', () => {
         draggingElement.querySelectorAll('tspan').forEach(tspan => tspan.setAttribute("x", newX));
         entry.leaderLine.labelX = newX;
         entry.leaderLine.labelY = newY;
-        
+
         updateLeaderLineOnLabelDrag(entry);
         updateViewBox();
     }
-    
+
     function updateLeaderLineOnLabelDrag(entry) {
-        const leaderLineLabelOffset = 20; 
+        const leaderLineLabelOffset = 20;
         const vecLabelToAnchorX = entry.leaderLine.x2 - entry.leaderLine.labelX;
         const vecLabelToAnchorY = entry.leaderLine.y2 - entry.leaderLine.labelY;
         const distLabelToAnchor = Math.sqrt(vecLabelToAnchorX * vecLabelToAnchorX + vecLabelToAnchorY * vecLabelToAnchorY);
@@ -489,14 +494,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (distLabelToAnchor > leaderLineLabelOffset) {
             entry.leaderLine.x1 = entry.leaderLine.labelX + vecLabelToAnchorX * (leaderLineLabelOffset / distLabelToAnchor);
             entry.leaderLine.y1 = entry.leaderLine.labelY + vecLabelToAnchorY * (leaderLineLabelOffset / distLabelToAnchor);
-        } else { 
-            entry.leaderLine.x1 = entry.leaderLine.x2; 
+        } else {
+            entry.leaderLine.x1 = entry.leaderLine.x2;
             entry.leaderLine.y1 = entry.leaderLine.y2;
         }
-        
+
         const lineElement = svgElement.querySelector(`polyline[data-line-for='${entry.id}']`);
         if (lineElement) {
-             lineElement.setAttribute("points", `${entry.leaderLine.x1},${entry.leaderLine.y1} ${entry.leaderLine.x2},${entry.leaderLine.y2}`);
+            lineElement.setAttribute("points", `${entry.leaderLine.x1},${entry.leaderLine.y1} ${entry.leaderLine.x2},${entry.leaderLine.y2}`);
         }
     }
 
@@ -516,54 +521,55 @@ document.addEventListener('DOMContentLoaded', () => {
         row.classList.add('dragging-row');
         e.dataTransfer.effectAllowed = 'move';
     }
-    
+
     function handleDragOver(e) {
         e.preventDefault();
         const row = e.target.closest('tr');
         if (row) row.classList.add('drag-over');
         return false;
     }
-    
+
     function handleDragLeave(e) {
         const row = e.target.closest('tr');
         if (row) row.classList.remove('drag-over');
     }
-    
+
     function handleDrop(e) {
         e.preventDefault();
         const row = e.target.closest('tr');
         if (!row) return;
-        
+
         row.classList.remove('drag-over');
         const targetIndex = [...dom.dataTableBody.children].indexOf(row);
-    
+
         if (dragSourceIndex !== targetIndex) {
             // データの入れ替え
             const [movedItem] = dataEntries.splice(dragSourceIndex, 1);
             dataEntries.splice(targetIndex, 0, movedItem);
-            
+
             // 再描画
             renderTable();
             drawPieChart();
         }
     }
-    
+
     function handleDragEnd(e) {
         const row = e.target.closest('tr');
-        if (row) row.classList.remove('dragging-row');
-        // 全ての行から drag-over を除去（念のため）
-        [...dom.dataTableBody.children].forEach(r => r.classList.remove('drag-over'));
+        if (row) {
+            row.classList.remove('dragging-row');
+            row.draggable = false;
+        }
     }
 
     // --- イベントリスナーの設定 ---
-    
+
     dom.addRowBtn.onclick = () => addDataEntry();
-    
+
     dom.pasteDataBtn.onclick = () => {
         dom.pasteArea.classList.toggle('hidden');
         if (!dom.pasteArea.classList.contains('hidden')) dom.pasteTextarea.focus();
     };
-    
+
     dom.submitPasteBtn.onclick = () => {
         const text = dom.pasteTextarea.value.trim();
         if (!text) { showMessage("貼り付けるデータがありません。", "error"); return; }
@@ -594,7 +600,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const img = new Image();
         img.onload = () => {
             // 背景を透過させるため、塗りつぶし処理は行わない
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height); 
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             const pngUrl = canvas.toDataURL("image/png");
             const link = document.createElement("a");
             link.download = "interactive-pie-chart-transparent.png"; link.href = pngUrl;
@@ -604,7 +610,7 @@ document.addEventListener('DOMContentLoaded', () => {
         img.onerror = (e) => { console.error("SVGから画像への変換エラー:", e); showMessage("PNG画像の生成に失敗しました。", "error"); };
         img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
     };
-    
+
     dom.chartContainer.addEventListener('mousedown', startDrag);
 
     window.onresize = () => {
@@ -612,10 +618,10 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(window.resizeTimer);
         window.resizeTimer = setTimeout(() => {
             if (svgElement && dataEntries.filter(e => e.value > 0).length > 0) { drawPieChart(); }
-        }, 250); 
+        }, 250);
     };
 
     // --- 初期化処理 ---
     setupImageControlListeners();
-    renderTable(); 
+    renderTable();
 });

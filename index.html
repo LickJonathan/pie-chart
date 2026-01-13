@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +12,7 @@
     <!-- JavaScript (defer属性でHTML解析後に実行) -->
     <script src="script.js" type="module"></script>
 </head>
+
 <body class="bg-gray-100 p-4 sm:p-8">
     <div class="container mx-auto max-w-6xl bg-white p-6 sm:p-8 rounded-lg shadow-xl">
         <!-- ヘッダー -->
@@ -27,16 +29,20 @@
             <section id="controls-section">
                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">データ入力</h2>
                 <div class="mb-4 space-y-2 sm:space-y-0 sm:space-x-2 flex flex-col sm:flex-row">
-                    <button id="add-row-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-150 ease-in-out w-full sm:w-auto">
+                    <button id="add-row-btn"
+                        class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-150 ease-in-out w-full sm:w-auto">
                         行を追加
                     </button>
-                    <button id="paste-data-btn" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-150 ease-in-out mt-2 sm:mt-0 w-full sm:w-auto">
+                    <button id="paste-data-btn"
+                        class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-150 ease-in-out mt-2 sm:mt-0 w-full sm:w-auto">
                         クリップボードから貼り付け
                     </button>
                 </div>
                 <div id="paste-area" class="hidden mb-4">
-                    <textarea id="paste-textarea" rows="5" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400" placeholder="項目名1\t値1\n項目名2\t値2... (タブ区切り)"></textarea>
-                    <button id="submit-paste-btn" class="mt-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-150 ease-in-out">
+                    <textarea id="paste-textarea" rows="5"
+                        class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400"></textarea>
+                    <button id="submit-paste-btn"
+                        class="mt-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-150 ease-in-out">
                         貼り付け実行
                     </button>
                 </div>
@@ -45,17 +51,18 @@
                     <table id="data-table" class="w-full min-w-max text-sm text-left text-gray-500">
                         <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                             <tr>
-                                <th scope="col" class="px-4 py-3 w-10"></th> 
+                                <th scope="col" class="px-4 py-3 w-10"></th>
                                 <th scope="col" class="px-4 py-3">項目名</th>
                                 <th scope="col" class="px-4 py-3">値</th>
                                 <th scope="col" class="px-4 py-3">画像</th>
-                                <th scope="col" class="px-4 py-3">アクション</th>
+                                <th scope="col" class="px-4 py-3">削除</th>
                             </tr>
                         </thead>
                         <tbody id="data-table-body"></tbody>
                     </table>
                 </div>
-                <p id="no-data-message" class="text-gray-500 mt-4 text-center">データがありません。「行を追加」または「クリップボードから貼り付け」でデータを入力してください。</p>
+                <p id="no-data-message" class="text-gray-500 mt-4 text-center">
+                    データがありません。「行を追加」または「クリップボードから貼り付け」でデータを入力してください。</p>
             </section>
 
             <!-- プレビューと調整セクション -->
@@ -64,34 +71,49 @@
                 <div>
                     <div class="flex justify-between items-center mb-3">
                         <h3 class="text-xl font-semibold text-gray-700">円グラフ</h3>
-                        <button id="download-png-btn" class="bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-150 ease-in-out disabled:opacity-50 text-sm" disabled>
+                        <button id="download-png-btn"
+                            class="bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-150 ease-in-out disabled:opacity-50 text-sm"
+                            disabled>
                             透過PNGダウンロード
                         </button>
                     </div>
-                    <div id="chart-container" class="aspect-square-container bg-white rounded-lg shadow-md flex items-center justify-center border border-gray-200">
-                         <p id="chart-placeholder" class="text-gray-400 p-4 text-center">データ入力後にグラフが表示されます</p>
+                    <div id="chart-container"
+                        class="aspect-square-container bg-white rounded-lg shadow-md flex items-center justify-center border border-gray-200">
+                        <p id="chart-placeholder" class="text-gray-400 p-4 text-center">データ入力後にグラフが表示されます</p>
                     </div>
                 </div>
-                
+
                 <div id="image-controls-container" class="mt-8 hidden">
-                    <h3 class="text-xl font-semibold text-gray-700 mb-3">選択中のパイの画像調整 (<span id="selected-item-name"></span>)</h3>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-3">選択中のパイの画像調整 (<span
+                            id="selected-item-name"></span>)</h3>
                     <div class="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
                         <div>
-                            <label for="image-scale" class="block text-sm font-medium text-gray-700">スケール: <span id="scale-value">1</span></label>
-                            <input type="range" id="image-scale" min="0.1" max="3" step="0.05" value="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                            <label for="image-scale" class="block text-sm font-medium text-gray-700">スケール: <span
+                                    id="scale-value">1</span></label>
+                            <input type="range" id="image-scale" min="0.1" max="3" step="0.05" value="1"
+                                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         </div>
                         <div>
-                            <label for="image-offset-x" class="block text-sm font-medium text-gray-700">Xオフセット: <span id="offset-x-value">0</span></label>
-                            <input type="range" id="image-offset-x" min="-100" max="100" step="1" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                            <label for="image-offset-x" class="block text-sm font-medium text-gray-700">Xオフセット: <span
+                                    id="offset-x-value">0</span></label>
+                            <input type="range" id="image-offset-x" min="-100" max="100" step="1" value="0"
+                                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         </div>
                         <div>
-                            <label for="image-offset-y" class="block text-sm font-medium text-gray-700">Yオフセット: <span id="offset-y-value">0</span></label>
-                            <input type="range" id="image-offset-y" min="-100" max="100" step="1" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                            <label for="image-offset-y" class="block text-sm font-medium text-gray-700">Yオフセット: <span
+                                    id="offset-y-value">0</span></label>
+                            <input type="range" id="image-offset-y" min="-100" max="100" step="1" value="0"
+                                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                         </div>
                     </div>
                 </div>
             </section>
         </div>
     </div>
+    <script>
+        const textarea = document.getElementById("paste-textarea");
+        textarea.placeholder = "項目名1\t値1\n項目名2\t値2\n... (タブ区切り)";
+    </script>
 </body>
+
 </html>

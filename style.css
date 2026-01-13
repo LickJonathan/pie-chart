@@ -1,30 +1,31 @@
 /* 基本的なフォント設定 */
-body { 
-    font-family: 'Inter', sans-serif, 'Noto Sans JP', sans-serif; 
+body {
+    font-family: 'Inter', sans-serif, 'Noto Sans JP', sans-serif;
 }
 
 /* ドラッグ可能な要素のカーソル設定 */
-.draggable { 
-    cursor: grab; 
+.draggable {
+    cursor: grab;
 }
-.dragging { 
-    cursor: grabbing; 
+
+.dragging {
+    cursor: grabbing;
 }
 
 /* データ入力テーブルのインプット幅を調整 */
-#data-table input[type="text"], 
+#data-table input[type="text"],
 #data-table input[type="number"] {
     min-width: 100px;
 }
 
 /* SVG要素内のラベルテキストが選択されるのを防ぐ */
 .leader-line-label {
-    user-select: none; 
+    user-select: none;
 }
 
 /* Firefoxでドラッグ中にゴースト画像が表示されるのを防ぐ */
-.draggable img { 
-    pointer-events: none; 
+.draggable img {
+    pointer-events: none;
 }
 
 /* カスタムメッセージボックスのスタイル */
@@ -42,6 +43,7 @@ body {
     opacity: 0;
     transition: opacity 0.5s ease-in-out;
 }
+
 /* メッセージボックス表示時のスタイル */
 .custom-message-box.show {
     display: block;
@@ -51,11 +53,12 @@ body {
 /* 正方形のアスペクト比を維持するコンテナ */
 .aspect-square-container {
     width: 100%;
-    padding-bottom: 100%; 
+    padding-bottom: 100%;
     position: relative;
 }
+
 /* コンテナ内のSVGをレスポンシブにする */
-.aspect-square-container > svg {
+.aspect-square-container>svg {
     position: absolute;
     top: 0;
     left: 0;
@@ -71,6 +74,7 @@ body {
     justify-content: center;
     align-items: center;
 }
+
 .drag-handle:active {
     cursor: grabbing;
 }
@@ -83,5 +87,6 @@ tr.dragging-row {
 
 /* ドロップ先の強調（上に線を引く） */
 tr.drag-over {
-    border-top: 3px solid #6366f1; /* indigo-500 */
+    border-top: 3px solid #6366f1;
+    /* indigo-500 */
 }

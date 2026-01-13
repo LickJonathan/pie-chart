@@ -13,9 +13,14 @@ body {
 }
 
 /* データ入力テーブルのインプット幅を調整 */
-#data-table input[type="text"],
-#data-table input[type="number"] {
+#data-table input[type="text"] {
+    width: 100%;
     min-width: 100px;
+}
+
+#data-table input[type="number"] {
+    max-width: 100px;
+    min-width: 50px;
 }
 
 /* SVG要素内のラベルテキストが選択されるのを防ぐ */

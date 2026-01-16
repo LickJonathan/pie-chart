@@ -93,6 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dataEntries.push(entry);
         renderTable();
         drawPieChart();
+        PieChartStorage.save(dataEntries, nextEntryId);
     }
 
     /**
@@ -163,6 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
         input.onchange = (e) => {
             entry.name = e.target.value; drawPieChart();
             if (selectedEntryId === entry.id) dom.selectedItemNameSpan.textContent = entry.name;
+            PieChartStorage.save(dataEntries, nextEntryId);
         };
         cell.appendChild(input);
     }
@@ -174,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
         input.className = 'w-full p-1 border border-gray-300 rounded focus:ring-1 focus:ring-indigo-400';
         input.onchange = (e) => {
             entry.value = Math.max(0, parseFloat(e.target.value) || 0); drawPieChart();
+            PieChartStorage.save(dataEntries, nextEntryId);
         };
         cell.appendChild(input);
     }
@@ -192,6 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     entry.imageSettings = { scale: 1, offsetX: 0, offsetY: 0 };
                     if (selectedEntryId === entry.id) updateImageControlsUI(entry);
                     renderTable(); drawPieChart();
+                    PieChartStorage.save(dataEntries, nextEntryId);
                 };
                 reader.readAsDataURL(file);
             }
@@ -216,6 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 selectedEntryId = null; dom.imageControlsContainer.classList.add('hidden');
             }
             renderTable(); drawPieChart();
+            PieChartStorage.save(dataEntries, nextEntryId);
         };
         cell.appendChild(deleteBtn);
     }
@@ -262,6 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (span) span.textContent = value;
 
             drawPieChart();
+            PieChartStorage.save(dataEntries, nextEntryId);
         }
     }
 
@@ -511,6 +517,7 @@ document.addEventListener('DOMContentLoaded', () => {
             draggingElement = null;
             document.removeEventListener('mousemove', drag);
             document.removeEventListener('mouseup', endDrag);
+            PieChartStorage.save(dataEntries, nextEntryId);
         }
     }
 
@@ -550,6 +557,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 再描画
             renderTable();
             drawPieChart();
+            PieChartStorage.save(dataEntries, nextEntryId);
         }
     }
 
@@ -622,6 +630,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- 初期化処理 ---
+    const savedData = PieChartStorage.load();
+    if (savedData) {
+        dataEntries = savedData.dataEntries;
+        nextEntryId = savedData.nextEntryId;
+    }
+
     setupImageControlListeners();
     renderTable();
+    if (dataEntries.length > 0) {
+        drawPieChart();
+    }
 });
